@@ -1,0 +1,18 @@
+[Unit]
+Description=Chasing Your Tail GUI
+Documentation=https://github.com/ArgeliusLabs/Chasing-Your-Tail-NG
+After=graphical.target cyt-kismet.service
+Wants=graphical.target
+
+[Service]
+Type=simple
+# User and paths will be substituted by installer
+User=root
+Environment=DISPLAY=:0
+WorkingDirectory=/opt/cyt
+ExecStart=/usr/bin/python3 /opt/cyt/cyt_gui.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

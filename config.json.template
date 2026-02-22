@@ -1,0 +1,28 @@
+{
+  "paths": {
+    "base_dir": "{{INSTALL_DIR}}",
+    "log_dir": "logs",
+    "kismet_logs": "{{KISMET_LOGS}}",
+    "ignore_lists": {
+      "mac": "mac_list.json",
+      "ssid": "ssid_list.json"
+    }
+  },
+  "timing": {
+    "check_interval": 60,
+    "list_update_interval": 5,
+    "time_windows": {
+      "recent": 5,
+      "medium": 10,
+      "old": 15,
+      "oldest": 20
+    }
+  },
+  "search": {
+    "lat_min": {{LAT_MIN}},
+    "lat_max": {{LAT_MAX}},
+    "lon_min": {{LON_MIN}},
+    "lon_max": {{LON_MAX}}
+  },
+  "wifi_interface": "{{WIFI_INTERFACE}}"
+}
