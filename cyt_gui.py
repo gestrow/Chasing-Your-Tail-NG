@@ -4,19 +4,18 @@ Enhanced CYT GUI - BlackHat Arsenal Ready
 Maintains Fisher Price usability for small screens while looking professional
 """
 import tkinter as tk
-from tkinter import ttk, messagebox, scrolledtext
+from tkinter import messagebox, scrolledtext
 import subprocess
 import os
 import pathlib
 import sqlite3
 import glob
 import json
-import time
 import threading
 from datetime import datetime
+from typing import Any, Literal
 
 # Set test mode for GUI before any imports
-import os
 os.environ['CYT_TEST_MODE'] = 'true'  # Enable test mode for GUI
 
 class CYTGui:
@@ -327,7 +326,7 @@ class CYTGui:
             
         # Check database
         db_file, db_error = self.check_kismet_db()
-        if db_error:
+        if db_file is None or db_error:
             self.db_status.config(text="❌ Database: Error", fg='#dc3545')
         else:
             # Get device count
@@ -361,7 +360,7 @@ class CYTGui:
         except:
             return False
             
-    def check_kismet_db(self):
+    def check_kismet_db(self) -> tuple[None, str] | tuple[Any, None]:
         """Check if Kismet database exists and is accessible"""
         if not self.config:
             try:
@@ -425,7 +424,7 @@ class CYTGui:
         try:
             # Check database first
             db_file, error = self.check_kismet_db()
-            if error:
+            if db_file is None or error:
                 self.log_message(f"❌ Database error: {error}")
                 return
                 
@@ -538,7 +537,7 @@ class CYTGui:
             self.log_message("✅ CYT process started successfully")
             
             # Read output in real-time
-            for line in process.stdout:
+            for line in (process.stdout or []):
                 if line.strip():
                     self.log_message(f"CYT: {line.strip()}")
                     
