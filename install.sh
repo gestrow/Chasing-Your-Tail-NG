@@ -11,13 +11,52 @@
 
 set -e
 
-# Script directory
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Script directory - resolve robustly regardless of how invoked (sudo, bash, symlink, etc.)
+# Try multiple methods to find our real location
+if [[ -n "${BASH_SOURCE[0]}" ]] && [[ "${BASH_SOURCE[0]}" != "$0" || -f "${BASH_SOURCE[0]}" ]]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+elif [[ -f "$0" ]]; then
+    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+else
+    SCRIPT_DIR="$(pwd)"
+fi
+# Resolve symlinks if readlink is available
+if command -v readlink &>/dev/null; then
+    _resolved="$(readlink -f "${BASH_SOURCE[0]:-$0}" 2>/dev/null)" || true
+    if [[ -n "$_resolved" && -f "$_resolved" ]]; then
+        SCRIPT_DIR="$(cd "$(dirname "$_resolved")" && pwd)"
+    fi
+    unset _resolved
+fi
 
-# Source library functions
-source "$SCRIPT_DIR/scripts/lib/colors.sh"
-source "$SCRIPT_DIR/scripts/lib/utils.sh"
-source "$SCRIPT_DIR/scripts/lib/distro.sh"
+# Verify required files exist before sourcing
+if [[ ! -f "$SCRIPT_DIR/scripts/lib/colors.sh" ]]; then
+    echo ""
+    echo "ERROR: Cannot find installer files at: $SCRIPT_DIR/scripts/lib/"
+    echo ""
+    echo "Resolved SCRIPT_DIR to: $SCRIPT_DIR"
+    echo "Current directory:      $(pwd)"
+    echo "Invoked as:             $0"
+    echo ""
+    echo "Make sure you are running from inside the CYT directory:"
+    echo ""
+    echo "  cd /path/to/Chasing-Your-Tail-NG"
+    echo "  sudo ./install.sh"
+    echo ""
+    echo "If you downloaded a ZIP, ensure the scripts/lib/ directory exists."
+    echo "Preferred method is git clone:"
+    echo ""
+    echo "  git clone -b dev https://github.com/gestrow/Chasing-Your-Tail-NG.git"
+    echo "  cd Chasing-Your-Tail-NG"
+    echo "  sudo ./install.sh"
+    exit 1
+fi
+
+# Source library functions and export path so sub-scripts don't need to re-resolve
+export CYT_LIB_DIR="$SCRIPT_DIR/scripts/lib"
+source "$CYT_LIB_DIR/colors.sh"
+source "$CYT_LIB_DIR/utils.sh"
+source "$CYT_LIB_DIR/distro.sh"
 
 # Version
 VERSION="1.0.0"
@@ -213,12 +252,9 @@ main() {
     echo -e "  ${CYAN}cd $INSTALL_DIR${NC}"
     echo
 
-    if [[ -f "$INSTALL_DIR/.venv/bin/python3" ]]; then
-        echo -e "  ${CYAN}source .venv/bin/activate${NC}  # Activate virtual environment"
-    fi
-
-    echo -e "  ${CYAN}python3 cyt_gui.py${NC}          # Start GUI"
-    echo -e "  ${CYAN}python3 chasing_your_tail.py${NC} # CLI monitoring"
+    echo -e "  ${CYAN}./run.sh${NC}                    # Start Kismet + GUI"
+    echo -e "  ${CYAN}./run.sh --cli${NC}              # Start Kismet + CLI"
+    echo -e "  ${CYAN}./run.sh --stop${NC}             # Stop everything"
     echo
     echo -e "${BOLD}Documentation:${NC}"
     echo -e "  README.md     - Full documentation"

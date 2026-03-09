@@ -3,11 +3,12 @@
 
 set -e
 
-# Source library functions
+# Source library functions (use parent's CYT_LIB_DIR if available)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/lib/colors.sh"
-source "$SCRIPT_DIR/lib/utils.sh"
-source "$SCRIPT_DIR/lib/distro.sh"
+CYT_LIB_DIR="${CYT_LIB_DIR:-$SCRIPT_DIR/lib}"
+source "$CYT_LIB_DIR/colors.sh"
+source "$CYT_LIB_DIR/utils.sh"
+source "$CYT_LIB_DIR/distro.sh"
 
 print_section "Configuring CYT"
 

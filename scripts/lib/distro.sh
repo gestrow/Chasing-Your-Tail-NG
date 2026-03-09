@@ -2,8 +2,8 @@
 # Distribution and platform detection for CYT installer
 
 # Source colors if not already loaded
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-[[ -z "$NC" ]] && source "$SCRIPT_DIR/colors.sh"
+_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+[[ -z "$NC" ]] && source "$_LIB_DIR/colors.sh"
 
 # Detect the platform/distribution
 detect_platform() {

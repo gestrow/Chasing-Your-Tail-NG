@@ -38,7 +38,9 @@ This project has been security-hardened to eliminate critical vulnerabilities:
 ## Installation & Setup
 
 ### 1. Clone & Install
+**Important:** Use `git clone` — do not download the ZIP from GitHub (it may be missing required files).
 ```bash
+sudo apt-get install -y git  # if git is not installed
 git clone -b dev https://github.com/gestrow/Chasing-Your-Tail-NG.git
 cd Chasing-Your-Tail-NG
 chmod +x install.sh
@@ -69,6 +71,15 @@ Edit `config.json` with your paths and settings:
 
 ## Usage
 
+### Quick Start (All-in-One)
+```bash
+./run.sh              # Start Kismet + GUI (auto-detects display)
+./run.sh --cli        # Start Kismet + CLI monitoring (no GUI)
+./run.sh --gui-only   # GUI only (Kismet already running)
+./run.sh --stop       # Stop all CYT processes
+./run.sh --status     # Check what's running
+```
+
 ### GUI Interface
 ```bash
 python3 cyt_gui.py  # Enhanced GUI with surveillance analysis
@@ -83,7 +94,7 @@ python3 cyt_gui.py  # Enhanced GUI with surveillance analysis
 # Start core monitoring (secure)
 python3 chasing_your_tail.py
 
-# Start Kismet (ONLY working script - July 23, 2025 fix)
+# Start Kismet standalone
 ./start_kismet_clean.sh
 ```
 
