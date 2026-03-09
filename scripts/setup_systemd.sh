@@ -77,7 +77,7 @@ print_step "Creating Kismet service..."
 $SUDO tee "$SYSTEMD_DIR/cyt-kismet.service" > /dev/null << EOF
 [Unit]
 Description=Kismet Wireless Packet Capture for CYT
-Documentation=https://github.com/ArgeliusLabs/Chasing-Your-Tail-NG
+Documentation=https://github.com/gestrow/Chasing-Your-Tail-NG/tree/dev
 After=network.target
 Wants=network.target
 
@@ -99,7 +99,7 @@ if [[ "$NO_GUI" != "true" ]]; then
     $SUDO tee "$SYSTEMD_DIR/cyt-gui.service" > /dev/null << EOF
 [Unit]
 Description=Chasing Your Tail GUI
-Documentation=https://github.com/ArgeliusLabs/Chasing-Your-Tail-NG
+Documentation=https://github.com/gestrow/Chasing-Your-Tail-NG/tree/dev
 After=graphical.target cyt-kismet.service
 Wants=graphical.target
 

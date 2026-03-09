@@ -37,9 +37,17 @@ This project has been security-hardened to eliminate critical vulnerabilities:
 
 ## Installation & Setup
 
-### 1. Install Dependencies
+### 1. Clone & Install
 ```bash
-pip3 install -r requirements.txt
+git clone -b dev https://github.com/gestrow/Chasing-Your-Tail-NG.git
+cd Chasing-Your-Tail-NG
+chmod +x install.sh
+sudo ./install.sh
+```
+
+The installer handles system dependencies, Python packages, configuration, and optional auto-start services. For unattended/headless installs:
+```bash
+sudo ./install.sh --unattended --no-gui
 ```
 
 ### 2. Security Setup (REQUIRED FIRST TIME)

@@ -1,6 +1,6 @@
 [Unit]
 Description=Kismet Wireless Packet Capture for CYT
-Documentation=https://github.com/ArgeliusLabs/Chasing-Your-Tail-NG
+Documentation=https://github.com/gestrow/Chasing-Your-Tail-NG/tree/dev
 After=network.target
 Wants=network.target
 

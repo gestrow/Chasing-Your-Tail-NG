@@ -2,9 +2,12 @@
 
 ## Quick Start for BlackHat Demo
 
-### 1. Install Dependencies
+### 1. Clone & Install
 ```bash
-pip3 install -r requirements.txt
+git clone -b dev https://github.com/gestrow/Chasing-Your-Tail-NG.git
+cd Chasing-Your-Tail-NG
+chmod +x install.sh
+sudo ./install.sh
 ```
 
 ### 2. Security Setup (REQUIRED)
@@ -55,4 +58,4 @@ python3 surveillance_analyzer.py --demo
 - **CLAUDE.md** - Technical developer documentation
 
 ## Support
-GitHub: https://github.com/matt0177/cyt
+GitHub: https://github.com/gestrow/Chasing-Your-Tail-NG/tree/dev

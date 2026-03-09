@@ -1,6 +1,6 @@
 [Unit]
 Description=Chasing Your Tail GUI
-Documentation=https://github.com/ArgeliusLabs/Chasing-Your-Tail-NG
+Documentation=https://github.com/gestrow/Chasing-Your-Tail-NG/tree/dev
 After=graphical.target cyt-kismet.service
 Wants=graphical.target
 

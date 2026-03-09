@@ -5,7 +5,7 @@
 sleep 120
 
 # Change to the project directory first
-cd /home/matt/Desktop/cytng
+cd "$(dirname "${BASH_SOURCE[0]}")"
 
 # Set environment variables for GUI access
 export DISPLAY=:0
