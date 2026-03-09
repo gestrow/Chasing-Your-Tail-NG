@@ -24,7 +24,6 @@ REQUIRED_PKGS=(
 )
 
 OPTIONAL_PKGS=(
-    "kismet"
     "pandoc"
     "iw"
 )
@@ -72,6 +71,57 @@ for pkg in "${OPTIONAL_PKGS[@]}"; do
         print_step "$pkg already installed"
     fi
 done
+
+# Install Kismet (requires its own repo on most Debian-based systems)
+if ! command_exists kismet; then
+    if prompt_yn "Install Kismet (required for packet capture)?"; then
+        print_step "Installing Kismet..."
+
+        # Check if kismet is available in current repos
+        if apt-cache show kismet &>/dev/null 2>&1; then
+            $SUDO apt-get install -y kismet || warn "Failed to install Kismet from repos"
+        else
+            # Add official Kismet repository
+            print_step "Kismet not found in repos - adding official Kismet repository..."
+            if ! command_exists wget; then
+                $SUDO apt-get install -y -qq wget
+            fi
+
+            # Detect release codename
+            RELEASE=$(lsb_release -cs 2>/dev/null || echo "")
+            if [[ -z "$RELEASE" ]]; then
+                # Fallback for systems without lsb_release
+                RELEASE=$(grep VERSION_CODENAME /etc/os-release 2>/dev/null | cut -d= -f2)
+            fi
+            # Kali uses its own codename but Kismet repo uses Debian names
+            if [[ "$PLATFORM" == "kali" ]]; then
+                RELEASE="bookworm"
+            fi
+
+            if [[ -n "$RELEASE" ]]; then
+                print_step "Adding Kismet repo for $RELEASE..."
+                wget -q -O - https://www.kismetwireless.net/repos/kismet-release.gpg.key | \
+                    $SUDO tee /usr/share/keyrings/kismet-archive-keyring.gpg >/dev/null
+                echo "deb [signed-by=/usr/share/keyrings/kismet-archive-keyring.gpg] https://www.kismetwireless.net/repos/apt/release/$RELEASE $RELEASE main" | \
+                    $SUDO tee /etc/apt/sources.list.d/kismet.list >/dev/null
+                $SUDO apt-get update -qq
+                $SUDO apt-get install -y kismet || warn "Failed to install Kismet from official repo"
+            else
+                warn "Could not detect release codename - install Kismet manually:"
+                warn "  See https://www.kismetwireless.net/docs/readme/installing/linux/"
+            fi
+        fi
+
+        # Add current user to kismet group for non-root capture
+        if getent group kismet &>/dev/null; then
+            $SUDO usermod -aG kismet "${SUDO_USER:-$USER}" 2>/dev/null || true
+            print_info "Added ${SUDO_USER:-$USER} to kismet group (re-login required)"
+        fi
+    fi
+else
+    KISMET_VERSION=$(kismet --version 2>&1 | head -1)
+    print_step "Kismet already installed: $KISMET_VERSION"
+fi
 
 # Verify critical tools
 print_step "Verifying installations..."
