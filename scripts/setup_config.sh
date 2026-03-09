@@ -53,24 +53,24 @@ if [[ "$UNATTENDED" != "true" ]]; then
 
     # Geographic bounds (optional)
     if prompt_yn "Configure geographic search bounds?" "n"; then
-        LAT_MIN=$(prompt_input "Minimum latitude" "31.3")
-        LAT_MAX=$(prompt_input "Maximum latitude" "37.0")
-        LON_MIN=$(prompt_input "Minimum longitude" "-114.8")
-        LON_MAX=$(prompt_input "Maximum longitude" "-109.0")
+        LAT_MIN=$(prompt_input "Minimum latitude (CONUS)" "24.5")
+        LAT_MAX=$(prompt_input "Maximum latitude (CONUS)" "49.0")
+        LON_MIN=$(prompt_input "Minimum longitude (CONUS)" "-125.0")
+        LON_MAX=$(prompt_input "Maximum longitude (CONUS)" "-66.9")
     else
-        LAT_MIN="31.3"
-        LAT_MAX="37.0"
-        LON_MIN="-114.8"
-        LON_MAX="-109.0"
+        LAT_MIN="24.5"
+        LAT_MAX="49.0"
+        LON_MIN="-125.0"
+        LON_MAX="-66.9"
     fi
 else
     # Unattended defaults
     KISMET_LOGS="${KISMET_LOGS:-$DEFAULT_KISMET_LOGS}"
     WIFI_INTERFACE="${WIFI_INTERFACE:-$DEFAULT_WIFI_INTERFACE}"
-    LAT_MIN="${LAT_MIN:-31.3}"
-    LAT_MAX="${LAT_MAX:-37.0}"
-    LON_MIN="${LON_MIN:--114.8}"
-    LON_MAX="${LON_MAX:-109.0}"
+    LAT_MIN="${LAT_MIN:-24.5}"
+    LAT_MAX="${LAT_MAX:-49.0}"
+    LON_MIN="${LON_MIN:--125.0}"
+    LON_MAX="${LON_MAX:--66.9}"
 fi
 
 # Generate config.json
