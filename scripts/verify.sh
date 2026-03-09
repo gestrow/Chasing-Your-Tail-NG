@@ -142,7 +142,7 @@ if has_systemd; then
     print_step "Checking systemd services..."
     for service in cyt-kismet cyt-gui; do
         if systemctl list-unit-files | grep -q "$service.service"; then
-            local status=$(systemctl is-enabled "$service.service" 2>/dev/null || echo "disabled")
+            status=$(systemctl is-enabled "$service.service" 2>/dev/null || echo "disabled")
             print_success "$service.service: $status"
         else
             print_info "$service.service: not installed"
