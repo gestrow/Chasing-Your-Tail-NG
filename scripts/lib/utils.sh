@@ -89,9 +89,9 @@ prompt_select() {
         return
     fi
 
-    echo "$prompt"
+    echo "$prompt" >&2
     for i in "${!options[@]}"; do
-        echo "  $((i+1)). ${options[$i]}"
+        echo "  $((i+1)). ${options[$i]}" >&2
     done
 
     while true; do
