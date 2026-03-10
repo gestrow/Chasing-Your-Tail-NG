@@ -399,13 +399,23 @@ class CYTGui:
             else:
                 self.log_message("❌ Kismet is not running")
             
-            # Check monitor mode
+            # Check monitor mode - try iwconfig first, then iw
             try:
-                iwconfig_result = subprocess.run(['iwconfig'], capture_output=True, text=True, timeout=5)
-                if "Mode:Monitor" in iwconfig_result.stdout:
-                    self.log_message("✅ Monitor mode detected")
+                import shutil
+                if shutil.which('iwconfig'):
+                    iwconfig_result = subprocess.run(['iwconfig'], capture_output=True, text=True, timeout=5)
+                    if "Mode:Monitor" in iwconfig_result.stdout:
+                        self.log_message("✅ Monitor mode detected")
+                    else:
+                        self.log_message("❌ Monitor mode not detected")
+                elif shutil.which('iw'):
+                    iw_result = subprocess.run(['iw', 'dev'], capture_output=True, text=True, timeout=5)
+                    if "type monitor" in iw_result.stdout:
+                        self.log_message("✅ Monitor mode detected")
+                    else:
+                        self.log_message("❌ Monitor mode not detected")
                 else:
-                    self.log_message("❌ Monitor mode not detected")
+                    self.log_message("⚠️ Neither iwconfig nor iw found — install wireless-tools or iw")
             except Exception as e:
                 self.log_message(f"⚠️ Could not check monitor mode: {e}")
                 

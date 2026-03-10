@@ -30,11 +30,19 @@ else
     PYTHON="python3"
 fi
 
-# Read Wi-Fi interface from config.json if available
+# Read config from config.json if available
 WIFI_INTERFACE="wlan1"
+KISMET_LOG_DIR=""
 if [[ -f "$SCRIPT_DIR/config.json" ]]; then
     iface=$(grep -oP '"wifi_interface":\s*"\K[^"]+' "$SCRIPT_DIR/config.json" 2>/dev/null || true)
     [[ -n "$iface" ]] && WIFI_INTERFACE="$iface"
+    # Extract kismet_logs path and get the directory portion
+    klog=$(grep -oP '"kismet_logs":\s*"\K[^"]+' "$SCRIPT_DIR/config.json" 2>/dev/null || true)
+    if [[ -n "$klog" ]]; then
+        KISMET_LOG_DIR="$(dirname "$klog")"
+        # Expand ~ to real home dir
+        KISMET_LOG_DIR="${KISMET_LOG_DIR/#\~/$HOME}"
+    fi
 fi
 
 show_help() {
@@ -69,7 +77,13 @@ start_kismet() {
         return 1
     fi
 
-    sudo "$kismet_bin" -c "$WIFI_INTERFACE" --daemonize
+    # Ensure log directory exists
+    if [[ -n "$KISMET_LOG_DIR" ]]; then
+        mkdir -p "$KISMET_LOG_DIR"
+        sudo "$kismet_bin" -c "$WIFI_INTERFACE" --daemonize --log-prefix "$KISMET_LOG_DIR"
+    else
+        sudo "$kismet_bin" -c "$WIFI_INTERFACE" --daemonize
+    fi
 
     # Wait for Kismet to initialize
     local attempts=0

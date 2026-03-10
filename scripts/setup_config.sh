@@ -20,7 +20,13 @@ CONFIG_TEMPLATE="$INSTALL_DIR/config.json.template"
 # Default values - use SUDO_USER to get the real user when running under sudo
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME=$(eval echo "~$REAL_USER")
-DEFAULT_KISMET_LOGS="$REAL_HOME/kismet_logs/*.kismet"
+
+# Default kismet logs: in-place installs use local dir, system-wide uses home dir
+if [[ "$INSTALL_DIR" == "/opt/cyt" ]]; then
+    DEFAULT_KISMET_LOGS="$REAL_HOME/kismet_logs/*.kismet"
+else
+    DEFAULT_KISMET_LOGS="$INSTALL_DIR/*.kismet"
+fi
 DEFAULT_WIFI_INTERFACE="wlan1"
 
 # Detect available interfaces

@@ -21,11 +21,11 @@ REQUIRED_PKGS=(
     "python3"
     "python3-tk"
     "wireless-tools"
+    "iw"
 )
 
 OPTIONAL_PKGS=(
     "pandoc"
-    "iw"
 )
 
 # NetHunter/Kali usually has these pre-installed
