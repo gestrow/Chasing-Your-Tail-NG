@@ -156,7 +156,7 @@ else
         print_warning "The following directories contain your data:"
         for dir in "${DATA_DIRS[@]}"; do
             if [[ -d "$INSTALL_DIR/$dir" ]]; then
-                local count=$(find "$INSTALL_DIR/$dir" -type f 2>/dev/null | wc -l)
+                count=$(find "$INSTALL_DIR/$dir" -type f 2>/dev/null | wc -l)
                 echo "  - $dir/ ($count files)"
             fi
         done
