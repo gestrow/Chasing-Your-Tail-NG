@@ -716,7 +716,20 @@ class CYTGui:
                     self.log_message(f"🛑 Stopped {name} process")
                 except:
                     pass
-                    
+
+            # Stop Kismet service
+            try:
+                subprocess.run(['sudo', 'systemctl', 'stop', 'cyt-kismet.service'],
+                             capture_output=True, timeout=10)
+                self.log_message("🛑 Stopped Kismet service")
+            except Exception:
+                try:
+                    subprocess.run(['sudo', 'pkill', '-f', 'kismet'],
+                                 capture_output=True, timeout=5)
+                    self.log_message("🛑 Stopped Kismet process")
+                except Exception:
+                    pass
+
             self.log_message("👋 Goodbye!")
             self.root.quit()
             

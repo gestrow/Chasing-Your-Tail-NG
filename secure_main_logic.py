@@ -158,7 +158,7 @@ class SecureCYTMonitor:
                 return
             
             # Log the probe
-            message = f'Found a probe!: {ssid}'
+            message = f'Found a probe!: [{mac}] {ssid}'
             self.log_file.write(f'{message}\n')
             logger.info(f"Probe detected from {mac}: {ssid}")
             

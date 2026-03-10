@@ -19,34 +19,36 @@ class ProbeAnalyzer:
         self.wigle_api_key = credential_manager.get_wigle_token()
         if not self.wigle_api_key and not local_only:
             print("⚠️  No WiGLE API token found in secure storage. Use --local for offline analysis.")
-        self.probes = {}  # Dictionary to store probe requests {ssid: [timestamps]}
+        self.probes = {}  # {ssid: [{'timestamp': ts, 'mac': mac}, ...]}
         self.local_only = local_only  # New flag for local search only
         
     def parse_log_file(self, log_file):
         """Parse a single CYT log file for probe requests"""
-        probe_pattern = re.compile(r'Found a probe!: (.*?)\n')
-        # Update timestamp pattern to match log format
+        # Matches both new format "[MAC] SSID" and old format "SSID" (no MAC)
+        probe_pattern = re.compile(r'Found a probe!: (?:\[([A-Fa-f0-9:]+)\] )?(.*?)\n')
         timestamp_pattern = re.compile(r'Current Time: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})')
-        
+
         with open(log_file, 'r') as f:
             content = f.read()
-            
-        # Debug: Print all probes found in this file
-        probes_found = probe_pattern.findall(content)
+
+        probes_found = list(probe_pattern.finditer(content))
         print(f"\nFound {len(probes_found)} probes in {log_file}:")
         for probe in probes_found:
-            print(f"- {probe}")
-        
-        for probe in probe_pattern.finditer(content):
-            ssid = probe.group(1).strip()
+            mac = probe.group(1) or 'unknown'
+            ssid = probe.group(2).strip()
+            print(f"- [{mac}] {ssid}")
+
+        for probe in probes_found:
+            mac = probe.group(1) or 'unknown'
+            ssid = probe.group(2).strip()
             # Find nearest timestamp before this probe
             content_before = content[:probe.start()]
             timestamp_match = timestamp_pattern.findall(content_before)
             if timestamp_match:
-                timestamp = timestamp_match[-1]  # Get last timestamp before probe
+                timestamp = timestamp_match[-1]
                 if ssid not in self.probes:
                     self.probes[ssid] = []
-                self.probes[ssid].append(timestamp)
+                self.probes[ssid].append({'timestamp': timestamp, 'mac': mac})
             else:
                 # If no timestamp found, use file creation time from filename
                 # Format: cyt_log_MMDDYY_HHMMSS
@@ -56,7 +58,7 @@ class ProbeAnalyzer:
                     timestamp = f"{date_str[0][:2]}-{date_str[0][2:4]}-{date_str[0][4:]} {date_str[1][:2]}:{date_str[1][2:4]}:{date_str[1][4:]}"
                     if ssid not in self.probes:
                         self.probes[ssid] = []
-                    self.probes[ssid].append(timestamp)
+                    self.probes[ssid].append({'timestamp': timestamp, 'mac': mac})
     
     def parse_all_logs(self):
         """Parse log files in the log directory (filtered by days_back)"""
@@ -137,12 +139,16 @@ class ProbeAnalyzer:
         """Analyze collected probe requests"""
         results = []
         total_ssids = len(self.probes)
-        print(f"\nQuerying WiGLE for {total_ssids} unique SSIDs...")
-        for i, (ssid, timestamps) in enumerate(self.probes.items(), 1):
+        print(f"\nAnalyzing {total_ssids} unique SSIDs...")
+        for i, (ssid, entries) in enumerate(self.probes.items(), 1):
             print(f"\nProgress: {i}/{total_ssids}")
+            timestamps = [e['timestamp'] for e in entries]
+            unique_macs = sorted(set(e['mac'] for e in entries if e['mac'] != 'unknown'))
             result = {
                 "ssid": ssid,
-                "count": len(timestamps),
+                "count": len(entries),
+                "unique_devices": len(unique_macs),
+                "devices": unique_macs,
                 "first_seen": min(timestamps),
                 "last_seen": max(timestamps),
                 "wigle_data": self.query_wigle(ssid) if (self.wigle_api_key and not self.local_only) else None
@@ -159,8 +165,7 @@ def main():
     Before running:
     1. Make sure you have CYT log files in your logs directory
     2. To use WiGLE lookups:
-       - Get a WiGLE API key from wigle.net
-       - Add it to config.json under api_keys->wigle
+       - Run python3 migrate_credentials.py to set up API credentials
        - Set your search area in config.json under search
     """
     
@@ -170,13 +175,6 @@ def main():
         print("Run Chasing Your Tail first to generate some logs.")
         return
 
-    # Check WiGLE configuration
-    if not config.get('api_keys', {}).get('wigle'):
-        print("\nNote: WiGLE API key not configured.")
-        print("To enable WiGLE lookups:")
-        print("1. Get an API key from wigle.net")
-        print("2. Add it to config.json under api_keys->wigle")
-    
     parser = argparse.ArgumentParser(description='Analyze probe requests and query WiGLE')
     parser.add_argument('--wigle', action='store_true', 
                       help='Enable WiGLE API queries (disabled by default to protect API keys)')
@@ -223,9 +221,12 @@ def main():
     for result in results:
         print(f"\nSSID: {result['ssid']}")
         print(f"Times seen: {result['count']}")
+        if result['unique_devices'] > 0:
+            print(f"Unique devices: {result['unique_devices']}")
+            print(f"Devices: {', '.join(result['devices'])}")
         print(f"First seen: {result['first_seen']}")
         print(f"Last seen: {result['last_seen']}")
-        
+
         # Calculate time span
         first = datetime.strptime(result['first_seen'], '%m-%d-%y %H:%M:%S')
         last = datetime.strptime(result['last_seen'], '%m-%d-%y %H:%M:%S')
